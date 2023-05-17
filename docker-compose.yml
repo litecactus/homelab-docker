@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+  uptime-kuma:
+    image: louislam/uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - ./uptime-kuma-data:/app/data
+
+  shlink:
+    image: shlinkio/shlink:stable
+    restart: unless-stopped
+    environment:
+      DEFAULT_DOMAIN: my.domain.com
+#      IS_HTTPS_ENABLED: true
+      GEOLITE_LICENSE_KEY: apikey
+      DB_DRIVER: maria
+      DB_USER: root
+      DB_PASSWORD: supersecret
+      DB_HOST: mariadb-shlink
+    depends_on:
+      - mariadb-shlink
+
+  mariadb-shlink:
+    image: mariadb:latest
+    restart: unless-stopped
+    volumes:
+      - ./mariadb-shlink:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: supersecret
+#      MARIADB_USER: shlink
+#      MARIADB_PASSWORD: supersecret
+
+networks:
+  default:
+    external: true
+    name: proxynetw
