@@ -41,6 +41,28 @@ services:
 #      MARIADB_USER: shlink
 #      MARIADB_PASSWORD: supersecret
 
+  mariadb-wordpress:
+    image: mariadb:latest
+    restart: unless-stopped
+    volumes:
+      - ./mariadb-wordpress:/var/lib/mysql
+    environment:
+      - MARIADB_ROOT_PASSWORD=supersecret
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=supersecret
+      - MYSQL_PASSWORD=supersecret
+
+  wordpress-sitename:
+    image: wordpress:latest
+    restart: unless-stopped
+    volumes:
+      - ./wp_data:/var/www/html
+    environment:
+      - WORDPRESS_DB_HOST=mariadb-wordpress
+      - WORDPRESS_DB_USER=supersecret
+      - WORDPRESS_DB_PASSWORD=supersecret
+      - WORDPRESS_DB_NAME=wordpress
+
 networks:
   default:
     external: true
